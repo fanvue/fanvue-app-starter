@@ -74,6 +74,7 @@ pnpm start
 ### Recommended Services
 
 To deploy, we recommend using [Vercel](https://vercel.com/)
+
 If you need a database, [Supabase](https://supabase.com/) should have you covered
 
 Usage
