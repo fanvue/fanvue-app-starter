@@ -1,101 +1,92 @@
 import Image from "next/image";
+import { getCurrentUser } from "@/lib/fanvue";
 
-export default function Home() {
+export default async function Home() {
+  const me = await getCurrentUser();
+  const isAuthed = !!me;
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-[24px] row-start-2 items-center sm:items-start max-w-[720px] w-full">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
+          src="/logo192.png"
+          alt="Fanvue"
           width={180}
           height={38}
           priority
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="w-full rounded-lg border border-black/[.08] dark:border-white/[.145] p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="font-semibold text-lg">Fanvue App Starter</h2>
+            {isAuthed ? (
+              <form action="/api/oauth/logout" method="post">
+                <button className="rounded-full border border-solid border-transparent transition-colors bg-[#49f264ff] hover:bg-[#49f26433] text-black px-4 h-10 flex items-center gap-2 cursor-pointer hover:text-white group">
+                  <svg
+                    aria-hidden
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-black group-hover:text-white transition-colors"
+                  >
+                    <path d="m16 17 5-5-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Logout
+                </button>
+              </form>
+            ) : (
+              <a
+                className="rounded-full border border-solid border-transparent transition-colors bg-[#49f264ff] hover:bg-[#49f26433] text-black hover:text-white px-4 h-10 flex items-center gap-2 cursor-pointer"
+                href="/api/oauth/login"
+              >
+                <Image aria-hidden src="/logo192.png" alt="" width={20} height={20} />
+                Login with Fanvue
+              </a>
+            )}
+          </div>
+          <div className="mt-4">
+            {isAuthed ? (
+              <pre className="text-xs overflow-auto p-3 rounded bg-black/[.05] dark:bg-white/[.06]">{JSON.stringify(me, null, 2)}</pre>
+            ) : (
+              <p className="text-sm text-black/70 dark:text-white/70">
+                Click "Login with Fanvue" to authenticate and we will display your current user from the Fanvue API.
+              </p>
+            )}
+          </div>
         </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          href="https://api.fanvue.com/docs"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
             aria-hidden
             src="/file.svg"
-            alt="File icon"
+            alt="Docs icon"
             width={16}
             height={16}
           />
-          Learn
+          Fanvue API Docs
         </a>
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+          href="https://fanvue.com"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
             aria-hidden
             src="/globe.svg"
-            alt="Globe icon"
+            alt="Website icon"
             width={16}
             height={16}
           />
-          Go to nextjs.org →
+          Visit fanvue.com →
         </a>
       </footer>
     </div>

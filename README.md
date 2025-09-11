@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fanvue App Starter (Next.js App Router)
 
-## Getting Started
+## Requirements
 
-First, run the development server:
+- pnpm
+- Node 18+
+- An existing Fanvue App from [Fanvue Developers](https://fanvue.com/developers) (client id/secret)
+
+## Setup
+
+1. Create `.env.local` using `.env.example`
+
+2. Install deps and run:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment variables (.env)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Get your Fanvue OAuth credentials
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Visit [Fanvue Developer Area](https://fanvue.com/developers)
+2. Create a new App to obtain your Client ID and Client Secret
+3. Configure a Redirect URI
+   - Development: `http://localhost:3000/api/oauth/callback`
+   - Production: `https://YOUR_DOMAIN/api/oauth/callback`
+4. Configure scopes
+   - For this starter, you need: `read:self`
+   - The scopes you set in your `.env` must exactly match what you select in the Fanvue developer UI for your app
+   - Note: The app automatically includes required system scopes (`openid`, `offline_access`, `offline`) in addition to what you set in `OAUTH_SCOPES`
 
-## Learn More
+Required variables
 
-To learn more about Next.js, take a look at the following resources:
+- `OAUTH_CLIENT_ID`: From your Fanvue app
+- `OAUTH_CLIENT_SECRET`: From your Fanvue app
+- `OAUTH_SCOPES`: App scopes selected in the Fanvue UI (e.g. `read:self`)
+- `OAUTH_REDIRECT_URI`: Full URL to `/api/oauth/callback` for your environment
+- `SESSION_SECRET`: A random string of at least 16 characters
+- `SESSION_COOKIE_NAME` (default: `fanvue_oauth`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+These are not something you should change
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `OAUTH_ISSUER_BASE_URL` (default: `https://auth.fanvue.com`)
+- `API_BASE_URL` (default: `https://api.fanvue.com`)
 
-## Deploy on Vercel
+Example `.env.local` (development)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+OAUTH_CLIENT_ID=YOUR_CLIENT_ID
+OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET
+OAUTH_SCOPES=read:self
+OAUTH_REDIRECT_URI=http://localhost:3000/api/oauth/callback
+SESSION_SECRET=use-a-random-32+char-secret
+OAUTH_ISSUER_BASE_URL=https://auth.fanvue.com
+API_BASE_URL=https://api.fanvue.com
+SESSION_COOKIE_NAME=fanvue_oauth
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Production deployment
+
+- Set the same environment variables in your hosting provider for production
+- Ensure the Fanvue app has the production Redirect URI configured: `https://YOUR_DOMAIN/api/oauth/callback`
+- Ensure `OAUTH_SCOPES` exactly matches your selected scopes (e.g. `read:self`)
+- Build and run
+
+```bash
+pnpm install
+pnpm build
+pnpm start
+```
+
+### Recommended Services
+
+To deploy, we recommend using [Vercel](https://vercel.com/)
+If you need a database, [Supabase](https://supabase.com/) should have you covered
+
+Usage
+
+- Visit `/` and click “Login with Fanvue”
+- After OAuth, your Fanvue current user JSON is shown
+- Click “Logout” to clear the session
+
+Docs
+
+- Fanvue API: [https://api.fanvue.com/docs](https://api.fanvue.com/docs)

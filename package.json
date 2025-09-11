@@ -1,5 +1,5 @@
 {
-  "name": "fanvue-oauth-example",
+  "name": "fanvue-app-example",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,19 +9,22 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@t3-oss/env-nextjs": "^0.13.8",
+    "jose": "^6.1.0",
+    "next": "15.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.3"
+    "zod": "^4.1.7"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
