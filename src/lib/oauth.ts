@@ -60,7 +60,7 @@ export async function exchangeCodeForToken({
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization:
+      "X-Authorization":
         "Basic " +
         Buffer.from(
           `${oauthConfig.clientId}:${oauthConfig.clientSecret}`,
@@ -93,7 +93,7 @@ export async function refreshAccessToken(refreshToken: string) {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization:
+      "X-Authorization":
         "Basic " +
         Buffer.from(
           `${oauthConfig.clientId}:${oauthConfig.clientSecret}`,

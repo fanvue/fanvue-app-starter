@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { getCurrentUser } from "@/lib/fanvue";
+import MediaUploader from "@/app/components/MediaUploader";
 
 export default async function Home() {
   const me = await getCurrentUser();
@@ -48,7 +49,13 @@ export default async function Home() {
           </div>
           <div className="mt-4">
             {isAuthed ? (
-              <pre className="text-xs overflow-auto p-3 rounded bg-black/[.05] dark:bg-white/[.06]">{JSON.stringify(me, null, 2)}</pre>
+              <>
+                <pre className="text-xs overflow-auto p-3 rounded bg-black/[.05] dark:bg-white/[.06]">{JSON.stringify(me, null, 2)}</pre>
+                <div className="mt-4">
+                  <h3 className="font-medium mb-2">Upload media</h3>
+                  <MediaUploader />
+                </div>
+              </>
             ) : (
               <p className="text-sm text-black/70 dark:text-white/70">
                 Click "Login with Fanvue" to authenticate and we will display your current user from the Fanvue API.
