@@ -11,6 +11,9 @@ export const env = createEnv({
     OAUTH_REDIRECT_URI: z.url().optional(),
     OAUTH_SCOPES: z
       .string(),
+    OAUTH_RESPONSE_MODE: z.enum(["query", "form_post"]).optional(),
+    OAUTH_PROMPT: z.string().optional(),
+    BASE_URL: z.url().optional(),
     SESSION_COOKIE_NAME: z.string().default("fanvue_oauth"),
     SESSION_SECRET: z
       .string()
@@ -23,6 +26,9 @@ export const env = createEnv({
     OAUTH_ISSUER_BASE_URL: process.env.OAUTH_ISSUER_BASE_URL,
     OAUTH_REDIRECT_URI: process.env.OAUTH_REDIRECT_URI,
     OAUTH_SCOPES: process.env.OAUTH_SCOPES,
+    OAUTH_RESPONSE_MODE: process.env.OAUTH_RESPONSE_MODE as "query" | "form_post" | undefined,
+    OAUTH_PROMPT: process.env.OAUTH_PROMPT,
+    BASE_URL: process.env.BASE_URL,
     SESSION_COOKIE_NAME: process.env.SESSION_COOKIE_NAME,
     SESSION_SECRET: process.env.SESSION_SECRET,
     API_BASE_URL: process.env.API_BASE_URL,

@@ -1,9 +1,12 @@
 import Image from "next/image";
 import { getCurrentUser } from "@/lib/fanvue";
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
   const me = await getCurrentUser();
   const isAuthed = !!me;
+  const params = await searchParams;
+  const errorParam = typeof params?.error === "string" ? params.error : undefined;
+  const errorDescriptionParam = typeof params?.error_description === "string" ? params.error_description : undefined;
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[24px] row-start-2 items-center sm:items-start max-w-[720px] w-full">
@@ -40,12 +43,18 @@ export default async function Home() {
               <a
                 className="rounded-full border border-solid border-transparent transition-colors bg-[#49f264ff] hover:bg-[#49f26433] text-black hover:text-white px-4 h-10 flex items-center gap-2 cursor-pointer"
                 href="/api/oauth/login"
+                target="_top"
               >
                 <Image aria-hidden src="/logo192.png" alt="" width={20} height={20} />
                 Login with Fanvue
               </a>
             )}
           </div>
+          {!isAuthed && (errorParam || errorDescriptionParam) ? (
+            <div className="mt-3 text-sm text-red-600">
+              {(errorDescriptionParam as string) || (errorParam as string)}
+            </div>
+          ) : null}
           <div className="mt-4">
             {isAuthed ? (
               <pre className="text-xs overflow-auto p-3 rounded bg-black/[.05] dark:bg-white/[.06]">{JSON.stringify(me, null, 2)}</pre>

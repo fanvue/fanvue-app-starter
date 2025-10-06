@@ -23,19 +23,23 @@ const DEFAULT_SCOPES = "openid offline_access offline";
 export function getAuthorizeUrl({
   state,
   codeChallenge,
+  redirectUri,
 }: {
   state: string;
   codeChallenge: string;
+  redirectUri?: string;
 }) {
   const params = new URLSearchParams({
     response_type: "code",
     client_id: oauthConfig.clientId,
-    redirect_uri: env.OAUTH_REDIRECT_URI ?? oauthConfig.redirectUri ?? "",
+    redirect_uri: redirectUri ?? env.OAUTH_REDIRECT_URI ?? oauthConfig.redirectUri ?? "",
     scope: `${DEFAULT_SCOPES} ${env.OAUTH_SCOPES ?? ""}`,
     state,
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
   });
+  if (env.OAUTH_RESPONSE_MODE) params.set("response_mode", env.OAUTH_RESPONSE_MODE);
+  if (env.OAUTH_PROMPT) params.set("prompt", env.OAUTH_PROMPT);
   return `${oauthConfig.issuerBaseURL}/oauth2/auth?${params.toString()}`;
 }
 

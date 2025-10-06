@@ -17,6 +17,36 @@ pnpm install
 pnpm dev
 ```
 
+3. Generate an SSL certificate and https proxy for local development:
+
+Insert the actual name of your app instead of `[your-app-name-here]`
+
+Install mkcert and generate certificates
+
+```
+brew install mkcert
+mkcert -install
+mkcert [your-app-name-here].dev
+```
+
+Change your hosts file
+
+```
+echo "127.0.0.1 [your-app-name-here].dev" | sudo tee -a /etc/hosts
+```
+
+Then run the local SSL proxy
+
+```
+npx local-ssl-proxy --source 3001 --target 3000 --cert ./[your-app-name-here].dev.pem --key ./[your-app-name-here].dev-key.pem
+```
+
+Now setup your redirect URI in the fanvue UI to match:
+
+```
+https://[your-app-name-here].dev:3001/api/oauth/callback
+```
+
 ## Environment variables (.env)
 
 ### Get your Fanvue OAuth credentials

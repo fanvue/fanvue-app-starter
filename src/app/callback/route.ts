@@ -99,5 +99,3 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(`${env.BASE_URL}/?error=oauth_token_exchange_failed`, request.url));
   }
 }
-
-
