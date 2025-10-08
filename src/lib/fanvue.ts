@@ -19,20 +19,16 @@ export async function getCurrentUser() {
         expiresAt: Date.now() + refreshed.expires_in * 1000,
       };
       await setSession(session);
-    } catch {
-    }
+    } catch {}
   }
 
   try {
-    const res = await fetch(
-      `${env.API_BASE_URL}/users/me`,
-      {
-        headers: {
-          "X-Authorization": `Bearer ${session.accessToken}`,
-        },
-        cache: "no-store",
+    const res = await fetch(`${env.API_BASE_URL}/users/me`, {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
       },
-    );
+      cache: "no-store",
+    });
     if (!res.ok) return null;
     return res.json();
   } catch (error) {
@@ -40,5 +36,3 @@ export async function getCurrentUser() {
     return null;
   }
 }
-
-
