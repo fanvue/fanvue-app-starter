@@ -4,7 +4,7 @@
 
 - pnpm
 - Node 18+
-- An existing Fanvue App from [Fanvue Developers](https://fanvue.com/developers) (client id/secret)
+- An existing Fanvue App from [Fanvue Developer Area](https://fanvue.com/developers/apps) (client id/secret)
 
 ## Setup
 
