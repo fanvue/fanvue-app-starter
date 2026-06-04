@@ -1,4 +1,4 @@
-import { decodeJwtClaims, exchangeAssertionForToken } from "@/lib/embedded";
+import { decodeJwtClaims, exchangeAssertionForToken, fetchCurrentUser } from "@/lib/embedded";
 
 export const dynamic = "force-dynamic";
 
@@ -17,18 +17,27 @@ export default async function EmbeddedPage({
   const token = typeof params.token === "string" ? params.token : undefined;
 
   let result:
-    | { ok: true; accessClaims: Record<string, unknown> | null; scope?: string; hasRefresh: boolean }
+    | {
+        ok: true;
+        accessClaims: Record<string, unknown> | null;
+        scope?: string;
+        hasRefresh: boolean;
+        profile: { status: number; body: unknown };
+      }
     | { ok: false; error: string }
     | null = null;
 
   if (token) {
     try {
       const exchanged = await exchangeAssertionForToken(token);
+      // Prove the token works against a real resource server (styx /users/me).
+      const profile = await fetchCurrentUser(exchanged.access_token);
       result = {
         ok: true,
         accessClaims: decodeJwtClaims(exchanged.access_token),
         scope: exchanged.scope,
         hasRefresh: !!exchanged.refresh_token,
+        profile,
       };
     } catch (e) {
       result = { ok: false, error: e instanceof Error ? e.message : String(e) };
@@ -64,6 +73,25 @@ export default async function EmbeddedPage({
             <summary>access-token claims</summary>
             <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(result.accessClaims, null, 2)}</pre>
           </details>
+
+          <hr style={{ margin: "16px 0" }} />
+          <h2 style={{ fontSize: 16, fontWeight: 700 }}>Fanvue API — GET /users/me</h2>
+          <p>
+            status:{" "}
+            <code style={{ color: result.profile.status === 200 ? "green" : "#b00" }}>
+              {result.profile.status}
+            </code>
+          </p>
+          {result.profile.status === 200 ? (
+            <p>
+              ✓ The Fanvue API accepted the online token and returned the creator's profile:
+            </p>
+          ) : (
+            <p style={{ color: "#b00" }}>The API rejected the token.</p>
+          )}
+          <pre style={{ whiteSpace: "pre-wrap", maxHeight: 320, overflow: "auto" }}>
+            {JSON.stringify(result.profile.body, null, 2)}
+          </pre>
         </div>
       )}
     </div>

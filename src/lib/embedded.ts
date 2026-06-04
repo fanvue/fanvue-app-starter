@@ -1,4 +1,4 @@
-import { oauthConfig } from "@/env";
+import { env, oauthConfig } from "@/env";
 
 /**
  * Embedded-app online session flow (RFC 7523 jwt-bearer).
@@ -21,7 +21,7 @@ export async function exchangeAssertionForToken(assertion: string): Promise<Exch
   const params = new URLSearchParams({
     grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
     assertion,
-    scope: "openid",
+    scope: "openid read:self",
   });
 
   const res = await fetch(`${oauthConfig.issuerBaseURL}/oauth2/token`, {
@@ -40,6 +40,28 @@ export async function exchangeAssertionForToken(assertion: string): Promise<Exch
     throw new Error(`jwt-bearer exchange failed: ${res.status} ${text}`);
   }
   return JSON.parse(text) as ExchangedToken;
+}
+
+/**
+ * Calls the Fanvue API (styx) `/users/me` with the exchanged online access
+ * token — proves the token is accepted by a real resource server. Returns the
+ * HTTP status and the parsed body (or raw text on non-JSON).
+ */
+export async function fetchCurrentUser(
+  accessToken: string
+): Promise<{ status: number; body: unknown }> {
+  const res = await fetch(`${env.API_BASE_URL}/users/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+  const text = await res.text();
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    body = text;
+  }
+  return { status: res.status, body };
 }
 
 /** Decode a JWT payload without verifying — for display only. */
