@@ -1,4 +1,6 @@
-# Fanvue App Starter (Next.js App Router)
+pnpm install
+pnpm build
+pnpm start# Fanvue App Starter (Next.js App Router)
 
 ## Requirements
 
