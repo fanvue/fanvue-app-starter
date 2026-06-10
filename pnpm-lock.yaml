@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@andytango/fv-auth':
-        specifier: ^0.2.1
-        version: 0.2.1(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
+        specifier: ^0.2.2
+        version: 0.2.2(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
       '@t3-oss/env-nextjs':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.9.2)(zod@4.1.7)
@@ -61,8 +61,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@andytango/fv-auth@0.2.1':
-    resolution: {integrity: sha512-dAfQwCQyx+14JL39TUVQLncGIey0FH1WNvMaqCpZDJmN2XEl1DNQAnias4v4hooiy2IkoQL3uCKBco0tO7vbeg==}
+  '@andytango/fv-auth@0.2.2':
+    resolution: {integrity: sha512-Z9S5F6koqf5DuLX7lMxW8YS2zJpQAT1n14rp12JdKolkIQWxx/AbbVYU4EX4OK0/2r9Ibdq9s9avi9Ft0N1ubg==}
     peerDependencies:
       next: '>=14.0.0'
       react: '>=18.0.0'
@@ -2083,7 +2083,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@andytango/fv-auth@0.2.1(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)':
+  '@andytango/fv-auth@0.2.2(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)':
     dependencies:
       jose: 6.1.0
       neverthrow: 8.2.0
