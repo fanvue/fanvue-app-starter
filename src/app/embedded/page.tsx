@@ -7,6 +7,7 @@ export default function EmbeddedPage() {
   const { status, error } = useEmbeddedAuth();
   const { authFetch } = useAuth();
   const [profile, setProfile] = useState<unknown>(null);
+  const [offlineResult, setOfflineResult] = useState<unknown>(null);
 
   if (status === "exchanging") {
     return <p>Connecting to Fanvue…</p>;
@@ -43,6 +44,20 @@ export default function EmbeddedPage() {
         Load my profile
       </button>
       {profile != null && <pre>{JSON.stringify(profile, null, 2)}</pre>}
+      <h2>Offline flow</h2>
+      <p>
+        Runs a <code>refresh_token</code> grant and calls the API with the new
+        access token — no session token involved, as a background job would.
+      </p>
+      <button
+        onClick={async () => {
+          const res = await authFetch("/api/offline-test", { method: "POST" });
+          setOfflineResult(await res.json());
+        }}
+      >
+        Test offline refresh
+      </button>
+      {offlineResult != null && <pre>{JSON.stringify(offlineResult, null, 2)}</pre>}
     </div>
   );
 }
