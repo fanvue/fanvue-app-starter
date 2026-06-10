@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth, useEmbeddedAuth } from "@fanvue/auth/react";
+import { useAuth, useEmbeddedAuth } from "@andytango/fv-auth/react";
 
 export default function EmbeddedPage() {
   const { status, error } = useEmbeddedAuth();

@@ -2,7 +2,7 @@ import { type NextRequest } from "next/server";
 import {
   createConfig,
   createSessionExchangeHandler,
-} from "@fanvue/auth/nextjs/embedded-app";
+} from "@andytango/fv-auth/nextjs/embedded-app";
 
 // Deferred so createConfig() validates env vars at request time, not build time.
 let _handler: ReturnType<typeof createSessionExchangeHandler> | undefined;

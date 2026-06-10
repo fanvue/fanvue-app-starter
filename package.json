@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@fanvue/auth": "file:../fv-api-auth-library--embedded",
+    "@andytango/fv-auth": "^0.2.1",
     "@t3-oss/env-nextjs": "^0.13.8",
     "jose": "^6.1.0",
     "next": "16.2.1",
@@ -29,7 +29,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@fanvue/auth",
+      "@andytango/fv-auth",
       "@tailwindcss/oxide",
       "sharp",
       "unrs-resolver"
