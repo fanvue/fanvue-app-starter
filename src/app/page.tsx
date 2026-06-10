@@ -1,12 +1,18 @@
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/fanvue";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams;
+  // Fanvue opened us with an embedded session token but the Embed URL points
+  // at the site root — hand off to the embedded surface, token intact.
+  if (typeof params?.token === "string" && params.token.length > 0) {
+    redirect(`/embedded?token=${encodeURIComponent(params.token)}`);
+  }
   const me = await getCurrentUser();
   const isAuthed = !!me;
-  const params = await searchParams;
   const errorParam = typeof params?.error === "string" ? params.error : undefined;
   const errorDescriptionParam = typeof params?.error_description === "string" ? params.error_description : undefined;
   return (
