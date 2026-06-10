@@ -1,99 +1,48 @@
-import { decodeJwtClaims, exchangeAssertionForToken, fetchCurrentUser } from "@/lib/embedded";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useState } from "react";
+import { useAuth, useEmbeddedAuth } from "@fanvue/auth/react";
 
-/**
- * Embedded creator-surface entry point. Fanvue renders this inside an iframe
- * and injects a short-lived online session-token assertion as `?token=`. We
- * exchange it for a Hydra access token (RFC 7523 jwt-bearer) and show the
- * result — the spike's "App Home" proof.
- */
-export default async function EmbeddedPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = await searchParams;
-  const token = typeof params.token === "string" ? params.token : undefined;
+export default function EmbeddedPage() {
+  const { status, error } = useEmbeddedAuth();
+  const { authFetch } = useAuth();
+  const [profile, setProfile] = useState<unknown>(null);
 
-  let result:
-    | {
-        ok: true;
-        accessClaims: Record<string, unknown> | null;
-        scope?: string;
-        hasRefresh: boolean;
-        profile: { status: number; body: unknown };
-      }
-    | { ok: false; error: string }
-    | null = null;
+  if (status === "exchanging") {
+    return <p>Connecting to Fanvue…</p>;
+  }
 
-  if (token) {
-    try {
-      const exchanged = await exchangeAssertionForToken(token);
-      // Prove the token works against a real resource server (styx /users/me).
-      const profile = await fetchCurrentUser(exchanged.access_token);
-      result = {
-        ok: true,
-        accessClaims: decodeJwtClaims(exchanged.access_token),
-        scope: exchanged.scope,
-        hasRefresh: !!exchanged.refresh_token,
-        profile,
-      };
-    } catch (e) {
-      result = { ok: false, error: e instanceof Error ? e.message : String(e) };
-    }
+  if (status === "error") {
+    return (
+      <div>
+        <h1>Authentication failed</h1>
+        <p>
+          <code>{error}</code>
+          {error === "consent_required" &&
+            " — approve the app on the Fanvue consent screen, then reopen it."}
+          {error === "invalid_session_token" &&
+            " — the session token expired (~60s). Reopen the app from Fanvue."}
+        </p>
+      </div>
+    );
+  }
+
+  if (status === "idle") {
+    return <p>Open this app from the Fanvue App Store to authenticate.</p>;
   }
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", padding: 24, lineHeight: 1.5 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 700 }}>Embedded 3P app — online session</h1>
-      <p style={{ color: "#666" }}>
-        Assertion received: {token ? `${token.slice(0, 24)}… (${token.length} chars)` : "none"}
-      </p>
-
-      {result === null && <p>Waiting for a session token (open via the Fanvue app store).</p>}
-
-      {result?.ok === false && (
-        <pre style={{ color: "#b00", whiteSpace: "pre-wrap" }}>Exchange failed: {result.error}</pre>
-      )}
-
-      {result?.ok === true && (
-        <div>
-          <p style={{ color: "green", fontWeight: 600 }}>✓ Exchanged for an online access token</p>
-          <p>
-            sub: <code>{String(result.accessClaims?.sub ?? "?")}</code>
-          </p>
-          <p>
-            scope: <code>{result.scope ?? String(result.accessClaims?.scp ?? "?")}</code>
-          </p>
-          <p>
-            refresh token returned: <code>{result.hasRefresh ? "YES (unexpected)" : "no ✓"}</code>
-          </p>
-          <details>
-            <summary>access-token claims</summary>
-            <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(result.accessClaims, null, 2)}</pre>
-          </details>
-
-          <hr style={{ margin: "16px 0" }} />
-          <h2 style={{ fontSize: 16, fontWeight: 700 }}>Fanvue API — GET /users/me</h2>
-          <p>
-            status:{" "}
-            <code style={{ color: result.profile.status === 200 ? "green" : "#b00" }}>
-              {result.profile.status}
-            </code>
-          </p>
-          {result.profile.status === 200 ? (
-            <p>
-              ✓ The Fanvue API accepted the online token and returned the creator's profile:
-            </p>
-          ) : (
-            <p style={{ color: "#b00" }}>The API rejected the token.</p>
-          )}
-          <pre style={{ whiteSpace: "pre-wrap", maxHeight: 320, overflow: "auto" }}>
-            {JSON.stringify(result.profile.body, null, 2)}
-          </pre>
-        </div>
-      )}
+    <div>
+      <h1>Fanvue Embedded App — SDK Demo</h1>
+      <button
+        onClick={async () => {
+          const res = await authFetch("/api/me");
+          setProfile(await res.json());
+        }}
+      >
+        Load my profile
+      </button>
+      {profile != null && <pre>{JSON.stringify(profile, null, 2)}</pre>}
     </div>
   );
 }

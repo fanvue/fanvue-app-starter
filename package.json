@@ -9,10 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fanvue/auth": "file:../fv-api-auth-library--embedded",
     "@t3-oss/env-nextjs": "^0.13.8",
     "jose": "^6.1.0",
     "next": "16.2.1",
-    "react": "19.2.0",
+    "react": "19",
     "react-dom": "19.2.0",
     "zod": "^4.1.7"
   },
@@ -28,6 +29,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@fanvue/auth",
       "@tailwindcss/oxide",
       "sharp",
       "unrs-resolver"
