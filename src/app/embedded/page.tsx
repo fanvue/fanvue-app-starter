@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth, useEmbeddedAuth } from "@andytango/fv-auth/react";
+import { useAuth, useEmbeddedAuth } from "@fanvue/auth/react";
 
 const FANVUE_GREEN = "#49f264";
 
@@ -173,7 +173,7 @@ export default function EmbeddedPage() {
 
         <footer className="text-center text-xs text-white/30">
           Powered by{" "}
-          <code className="font-mono text-white/50">@andytango/fv-auth</code>
+          <code className="font-mono text-white/50">@fanvue/auth</code>
         </footer>
       </main>
     </div>

@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@andytango/fv-auth':
-        specifier: ^0.2.2
-        version: 0.2.2(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
+      '@fanvue/auth':
+        specifier: ^0.2.3
+        version: 0.2.3(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
       '@t3-oss/env-nextjs':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.9.2)(zod@4.1.7)
@@ -60,17 +60,6 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
-
-  '@andytango/fv-auth@0.2.2':
-    resolution: {integrity: sha512-Z9S5F6koqf5DuLX7lMxW8YS2zJpQAT1n14rp12JdKolkIQWxx/AbbVYU4EX4OK0/2r9Ibdq9s9avi9Ft0N1ubg==}
-    peerDependencies:
-      next: '>=14.0.0'
-      react: '>=18.0.0'
-    peerDependenciesMeta:
-      next:
-        optional: true
-      react:
-        optional: true
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -198,6 +187,17 @@ packages:
   '@eslint/plugin-kit@0.3.5':
     resolution: {integrity: sha512-Z5kJ+wU3oA7MMIqVR9tyZRtjYPr4OC004Q4Rw7pgOKUOKkJfZ3O24nz3WYfGRpMDNmcOi3TwQOmgm7B7Tpii0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fanvue/auth@0.2.3':
+    resolution: {integrity: sha512-ZKSPCk2MxuUvdYKiGH9fHZFJOl/Xl21+BIElm7W1ym3kr8ts7kJyZ8VdBNHofvxSPecgwS1raW/JFsKMe8+hFw==}
+    peerDependencies:
+      next: '>=14.0.0'
+      react: '>=18.0.0'
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react:
+        optional: true
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2083,16 +2083,6 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@andytango/fv-auth@0.2.2(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)':
-    dependencies:
-      jose: 6.1.0
-      neverthrow: 8.2.0
-      oauth4webapi: 3.8.6
-      zod: 4.4.3
-    optionalDependencies:
-      next: 16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      react: 19.2.0
-
   '@babel/code-frame@7.29.0':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
@@ -2264,6 +2254,16 @@ snapshots:
     dependencies:
       '@eslint/core': 0.15.2
       levn: 0.4.1
+
+  '@fanvue/auth@0.2.3(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)':
+    dependencies:
+      jose: 6.1.0
+      neverthrow: 8.2.0
+      oauth4webapi: 3.8.6
+      zod: 4.4.3
+    optionalDependencies:
+      next: 16.2.1(@babel/core@7.29.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react: 19.2.0
 
   '@humanfs/core@0.19.1': {}
 
