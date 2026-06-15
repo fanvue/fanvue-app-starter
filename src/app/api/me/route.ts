@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { HEADER_UPDATED_SESSION } from "@fanvue/auth";
+import { HEADER_UPDATED_SESSION } from "@fanvue/builder-sdk";
 import {
   createConfig,
   getAuthenticatedClient,
-} from "@fanvue/auth/nextjs/embedded-app";
+} from "@fanvue/builder-sdk/nextjs/embedded-app";
 
 export async function GET() {
   const config = createConfig();

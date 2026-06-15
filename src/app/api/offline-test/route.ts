@@ -5,8 +5,8 @@ import {
   createSessionJwt,
   HEADER_UPDATED_SESSION,
   type SessionPayload,
-} from "@fanvue/auth";
-import { createConfig, getSession } from "@fanvue/auth/nextjs/embedded-app";
+} from "@fanvue/builder-sdk";
+import { createConfig, getSession } from "@fanvue/builder-sdk/nextjs/embedded-app";
 
 const config = createConfig();
 
