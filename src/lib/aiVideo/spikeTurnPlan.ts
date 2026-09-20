@@ -43,7 +43,14 @@ const CLOTHES: ClothesState[] = [
   "bottomless",
   "nude",
 ];
-const POSES = ["as-photo", "standing", "sitting", "leaning", "kneeling", "lying"] as const;
+const POSES = [
+  "as-photo",
+  "standing",
+  "sitting",
+  "leaning",
+  "kneeling",
+  "lying",
+] as const;
 const HANDS = ["free", "on-body", "holding-toy"] as const;
 const CONTACTS = ["none", "self"] as const;
 const PROPS = ["none", "fetching", "vibrator", "dildo"] as const;
@@ -122,13 +129,15 @@ export const formatBodyState = (body: BodyState) =>
 const pick = <T extends string>(
   value: string | undefined,
   allowed: readonly T[],
-  fallback: T
+  fallback: T,
 ): T => {
   const found = allowed.find((item) => item === value);
   return found ?? fallback;
 };
 
-const layersFor = (clothes: ClothesState): Pick<BodyState, "trousers" | "underwear"> => {
+const layersFor = (
+  clothes: ClothesState,
+): Pick<BodyState, "trousers" | "underwear"> => {
   if (clothes === "nude") {
     return { trousers: "off", underwear: "off" };
   }
@@ -142,13 +151,18 @@ export const parseBodyState = (raw: string | null | undefined): BodyState => {
   if (!raw?.includes("clothes=")) {
     return { ...DEFAULT_BODY };
   }
-  const read = (key: string) => raw.match(new RegExp(`${key}=([^|]+)`))?.[1]?.trim();
+  const read = (key: string) =>
+    raw.match(new RegExp(`${key}=([^|]+)`))?.[1]?.trim();
   const clothes = pick(read("clothes"), CLOTHES, "clothed");
   const inferred = layersFor(clothes);
   return {
     clothes,
     trousers: pick(read("trousers"), ["on", "off"] as const, inferred.trousers),
-    underwear: pick(read("underwear"), ["on", "off"] as const, inferred.underwear),
+    underwear: pick(
+      read("underwear"),
+      ["on", "off"] as const,
+      inferred.underwear,
+    ),
     pose: pick(read("pose"), POSES, "sitting"),
     hands: pick(read("hands"), HANDS, "free"),
     contact: pick(read("contact"), CONTACTS, "none"),
@@ -195,18 +209,12 @@ export const wardrobeLine = (body: BodyState) => {
   );
 };
 
-/** Opening clip may dress her. Every later clip must copy the frame and not flicker. */
-export const dressLock = (body: BodyState, opening = false) => {
-  if (opening) {
-    return (
-      "OPENING WARDROBE: opaque, fully-covering top and opaque bottoms, with panties underneath. Three layers, " +
-      "none of it see-through, lingerie, or swimwear. Whatever she is wearing in the photo — a bra and panties, " +
-      "a bikini, partial clothing, or nothing — replace it with this opaque outfit before she moves. Do not carry " +
-      "over the photo's actual garment. Hands empty. No flicker."
-    );
-  }
-  return `WARDROBE FREEZE: ${wardrobeLine(body)}`;
-};
+/** Only used for the opening clip; reply clips freeze or leave wardrobe unstated instead (see plate()). */
+export const dressLock = () =>
+  "OPENING WARDROBE: opaque, fully-covering top and opaque bottoms, with panties underneath. Three layers, " +
+  "none of it see-through, lingerie, or swimwear. Whatever she is wearing in the photo — a bra and panties, " +
+  "a bikini, partial clothing, or nothing — replace it with this opaque outfit before she moves. Do not carry " +
+  "over the photo's actual garment. Hands empty. No flicker.";
 
 export const typingLeadSecFor = (text: string) => {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -218,14 +226,16 @@ export const typingLeadSecFor = (text: string) => {
 export const clipDurationFor = (
   channel: InputChannel,
   typingLeadSec: number,
-  cameraMode: CameraMode
+  cameraMode: CameraMode,
 ) => {
-  const spoken = channel === "chat" ? typingLeadSec + 4 : cameraMode === "walk" ? 12 : 10;
+  const spoken =
+    channel === "chat" ? typingLeadSec + 4 : cameraMode === "walk" ? 12 : 10;
   // Never shorter than a generation. A clip that ends first leaves the stream with nothing to play.
   return Math.min(15, Math.max(10, Math.ceil(spoken)));
 };
 
-const bareEnough = (clothes: ClothesState) => clothes === "topless" || clothes === "nude";
+const bareEnough = (clothes: ClothesState) =>
+  clothes === "topless" || clothes === "nude";
 
 // These are cosmetic gestures, not a layer coming off — clothesStep must not treat them as the
 // generic "tease" phrase (which lifts the top's hem) or they lose their own distinct visual.
@@ -233,14 +243,17 @@ const isBraStrapTease = (fanSaid: string) =>
   /\b(bra strap|strap tease|shoulder strap)\b/i.test(fanSaid);
 const isPantyTease = (fanSaid: string) =>
   /\b(panty tease|tease .{0,20}panties|waistband (tease|snap|pull)|flash (your |ur )?panties)\b/i.test(
-    fanSaid
+    fanSaid,
   );
 
 const clothesStep = (from: ClothesState, fanSaid: string): ClothesState => {
   if (isBraStrapTease(fanSaid) || isPantyTease(fanSaid)) {
     return from;
   }
-  const dress = /\b(put .{0,20}back|get dressed|cover up|shirt back|top back)\b/i.test(fanSaid);
+  const dress =
+    /\b(put .{0,20}back|get dressed|cover up|shirt back|top back)\b/i.test(
+      fanSaid,
+    );
   if (dress) {
     if (from === "nude") {
       return "topless";
@@ -251,27 +264,31 @@ const clothesStep = (from: ClothesState, fanSaid: string): ClothesState => {
     return from;
   }
 
-  const nude = /\b(naked|nude|get naked|strip|everything off|all off|nothing on)\b/i.test(fanSaid);
+  const nude =
+    /\b(naked|nude|get naked|strip|everything off|all off|nothing on)\b/i.test(
+      fanSaid,
+    );
   // Bare mentions of body-part nouns ("nice tits") used to trigger undressing on their own —
   // require a removal/reveal verb near the noun so a compliment doesn't strip her.
   const top =
     /\b(top off|shirt off|bra off|take (your |the )?(top|shirt|bra|tee)|topless)\b/i.test(
-      fanSaid
+      fanSaid,
     ) ||
     /\b(show|take off|pull down|whip out|flash|get)\b.{0,20}\b(tits|boobs|titties|breasts|nipples)\b/i.test(
-      fanSaid
+      fanSaid,
     );
   const tease = /\b(tease|lift your|flash|peek)\b/i.test(fanSaid);
-  const showAss = /\b(show (me )?(your |ur |her )?ass|show (your |ur )?booty|from behind)\b/i.test(
-    fanSaid
-  );
+  const showAss =
+    /\b(show (me )?(your |ur |her )?ass|show (your |ur )?booty|from behind)\b/i.test(
+      fanSaid,
+    );
   const panties =
     /\b(panties|thong|underwear|knickers)\b/i.test(fanSaid) &&
     /\b(off|down|remove)\b/i.test(fanSaid);
   const bottom =
     !showAss &&
     /\b(pants off|shorts off|skirt off|bottoms off|take (your |the )?(pants|shorts|skirt|bottoms))\b/i.test(
-      fanSaid
+      fanSaid,
     );
 
   if (tease && !top && (from === "as-photo" || from === "clothed")) {
@@ -283,7 +300,12 @@ const clothesStep = (from: ClothesState, fanSaid: string): ClothesState => {
   if (top && from === "bottomless") {
     return "topless";
   }
-  if ((bottom || panties) && from !== "bottomless" && from !== "nude" && from !== "topless") {
+  if (
+    (bottom || panties) &&
+    from !== "bottomless" &&
+    from !== "nude" &&
+    from !== "topless"
+  ) {
     return "bottomless";
   }
   if (nude) {
@@ -346,7 +368,7 @@ const clothesLine = (from: ClothesState, to: ClothesState) => {
 const facesCamera = (fanSaid: string) => {
   if (
     /\b(face me|face (the )?(camera|webcam|lens)|look at me|toward me|towards me|missionary|on your back)\b/i.test(
-      fanSaid
+      fanSaid,
     )
   ) {
     return true;
@@ -366,18 +388,34 @@ const wantsRearView = (fanSaid: string) => {
     return false;
   }
   return /\b(show (me )?(your |ur |her )?ass|shake (your |ur )?ass|ass shake|booty|from behind|turn your back|face away|doggy\w*|all fours)\b/i.test(
-    fanSaid
+    fanSaid,
   );
 };
 
-const poseStep = (fanSaid: string, pose: BodyState["pose"]): BodyState["pose"] => {
-  if (facesCamera(fanSaid) && /\b(bed|missionary|lie|lay|on your back)\b/i.test(fanSaid)) {
+// Doggystyle is on hands and knees, not the standing bend-over that a plain "show me your ass" gets.
+const isDoggy = (fanSaid: string) =>
+  /\b(doggy\w*|all fours|hands and knees)\b/i.test(fanSaid);
+
+const poseStep = (
+  fanSaid: string,
+  pose: BodyState["pose"],
+): BodyState["pose"] => {
+  if (
+    facesCamera(fanSaid) &&
+    /\b(bed|missionary|lie|lay|on your back)\b/i.test(fanSaid)
+  ) {
     return "lying";
   }
   if (/\b(lie|lay down|on your back|on the floor)\b/i.test(fanSaid)) {
     return "lying";
   }
-  if (/\b(kneel|on your knees|get on your knees)\b/i.test(fanSaid) && !facesCamera(fanSaid)) {
+  if (isDoggy(fanSaid) && !facesCamera(fanSaid)) {
+    return "kneeling";
+  }
+  if (
+    /\b(kneel|on your knees|get on your knees)\b/i.test(fanSaid) &&
+    !facesCamera(fanSaid)
+  ) {
     return "kneeling";
   }
   if (/\b(sit|sit down)\b/i.test(fanSaid)) {
@@ -386,7 +424,10 @@ const poseStep = (fanSaid: string, pose: BodyState["pose"]): BodyState["pose"] =
   if (/\b(lean back|lean)\b/i.test(fanSaid)) {
     return "leaning";
   }
-  if (wantsRearView(fanSaid) || (/\bturn around\b/i.test(fanSaid) && !facesCamera(fanSaid))) {
+  if (
+    wantsRearView(fanSaid) ||
+    (/\bturn around\b/i.test(fanSaid) && !facesCamera(fanSaid))
+  ) {
     return "standing";
   }
   if (/\b(stand up|get up|on your feet)\b/i.test(fanSaid)) {
@@ -405,9 +446,12 @@ const poseLine = (
   from: BodyState["pose"],
   to: BodyState["pose"],
   fanSaid: string,
-  sceneHasBed: boolean
+  sceneHasBed: boolean,
 ) => {
   if (from === to) {
+    if (to === "kneeling" && isDoggy(fanSaid)) {
+      return "She stays on her hands and knees, ass toward the webcam, and holds the position. The webcam stays fixed.";
+    }
     return null;
   }
   if (to === "standing") {
@@ -471,10 +515,11 @@ const gestureLine = (fanSaid: string) => {
     return null;
   }
   if (
-    wantsRearView(fanSaid) ||
-    /\b(show (me )?(your |ur |her )?ass|shake (your |ur )?ass|ass shake|booty|from behind)\b/i.test(
-      fanSaid
-    )
+    !isDoggy(fanSaid) &&
+    (wantsRearView(fanSaid) ||
+      /\b(show (me )?(your |ur |her )?ass|shake (your |ur )?ass|ass shake|booty|from behind)\b/i.test(
+        fanSaid,
+      ))
   ) {
     return (
       `${FACE_AWAY} She stands, turns her back fully to the webcam, and bends so her ass is toward the lens. ` +
@@ -495,7 +540,7 @@ const gestureLine = (fanSaid: string) => {
 
 const towardCamera = (fanSaid: string) =>
   /\b(fuck me|blow ?job|blow me|suck|deepthroat|ride me|inside me|have sex|sex with)\b/i.test(
-    fanSaid
+    fanSaid,
   );
 
 export type PlannedBeat = {
@@ -503,20 +548,25 @@ export type PlannedBeat = {
   nextBody: BodyState;
   cameraMode: CameraMode;
   durationSec: number;
-  followUp: { physical: string; nextBody: BodyState; durationSec: number } | null;
+  followUp: {
+    physical: string;
+    nextBody: BodyState;
+    durationSec: number;
+  } | null;
 };
 
 // A one-off action (a strip, a spread, a toy beat) only takes 3-4s — padding it to the old 10-15s
 // floor left dead air the model filled by re-dressing, undressing again, or inventing a prop.
 const ACTION_BEAT_DURATION_SEC = 8;
-const fitDuration = (seconds: number) => Math.min(15, Math.max(7, Math.round(seconds)));
+const fitDuration = (seconds: number) =>
+  Math.min(15, Math.max(7, Math.round(seconds)));
 
 const packBeat = (
   from: BodyState,
   next: BodyState,
   lines: string[],
   seconds: number,
-  outdoor: boolean
+  outdoor: boolean,
 ): PlannedBeat => {
   const changed =
     next.clothes !== from.clothes ||
@@ -594,26 +644,33 @@ export const planPhysicalBeat = (
   fanSaid: string,
   incomingBody: BodyState,
   outdoor: boolean,
-  sceneHasBed = true
+  sceneHasBed = true,
 ): PlannedBeat => {
   // A toy set in BODY STATE by an earlier request otherwise never clears — every later,
   // unrelated request (and idle's "continue the exact act" logic) keeps reintroducing it.
-  const continuesToy = /\b(dildo|vibrator|vibe|wand|toy|fuck yourself|suck|deepthroat)\b/i.test(
-    fanSaid
-  );
+  const continuesToy =
+    /\b(dildo|vibrator|vibe|wand|toy|fuck yourself|suck|deepthroat)\b/i.test(
+      fanSaid,
+    );
   const body: BodyState =
     incomingBody.prop !== "none" && !continuesToy
       ? {
           ...incomingBody,
           prop: "none",
-          hands: incomingBody.hands === "holding-toy" ? "free" : incomingBody.hands,
-          contact: incomingBody.hands === "holding-toy" ? "none" : incomingBody.contact,
+          hands:
+            incomingBody.hands === "holding-toy" ? "free" : incomingBody.hands,
+          contact:
+            incomingBody.hands === "holding-toy"
+              ? "none"
+              : incomingBody.contact,
         }
       : incomingBody;
 
   // Policy: any toy use is mouth-only, never vaginal or anal — however the fan phrases the ask.
   const inAss = /\b(in (her |your |my |the )?ass|anal|butt)\b/i.test(fanSaid);
-  const inPussy = /\b(in|inside) (her |your |my |the )?(pussy|cunt)\b/i.test(fanSaid);
+  const inPussy = /\b(in|inside) (her |your |my |the )?(pussy|cunt)\b/i.test(
+    fanSaid,
+  );
   const mentionsToy = /\bdildo|toy\b/i.test(fanSaid);
   const insertAsk =
     ((inAss || inPussy) && /\b(dildo|toy|put|insert|stick)\b/i.test(fanSaid)) ||
@@ -633,11 +690,11 @@ export const planPhysicalBeat = (
       next,
       [
         toyReachThen(
-          "She brings it to her mouth and sucks it for a few seconds, eyes on the webcam, still in the pose from the first frame."
+          "She brings it to her mouth and sucks it for a few seconds, eyes on the webcam, still in the pose from the first frame.",
         ),
       ],
       ACTION_BEAT_DURATION_SEC,
-      outdoor
+      outdoor,
     );
   }
 
@@ -663,32 +720,42 @@ export const planPhysicalBeat = (
       hands: "on-body",
       contact: "self",
     };
-    const line = rear ? spreadRearLine(nextPose) : spreadFacingLine(nextPose, sceneHasBed);
+    const line = rear
+      ? spreadRearLine(nextPose)
+      : spreadFacingLine(nextPose, sceneHasBed);
     return packBeat(body, next, [line], ACTION_BEAT_DURATION_SEC, outdoor);
   }
 
-  const wantsFullyNude = /\b(naked|nude|get naked|strip|everything off|all off|nothing on)\b/i.test(
-    fanSaid
-  );
+  const wantsFullyNude =
+    /\b(naked|nude|get naked|strip|everything off|all off|nothing on)\b/i.test(
+      fanSaid,
+    );
   if (
     wantsFullyNude &&
-    (body.clothes === "clothed" || body.clothes === "as-photo" || body.clothes === "top-lifted")
+    (body.clothes === "clothed" ||
+      body.clothes === "as-photo" ||
+      body.clothes === "top-lifted")
   ) {
     const mid: BodyState = { ...body, framing: "wider", clothes: "topless" };
-    const end: BodyState = { ...mid, clothes: "bottomless", trousers: "off", underwear: "on" };
+    const end: BodyState = {
+      ...mid,
+      clothes: "bottomless",
+      trousers: "off",
+      underwear: "on",
+    };
     const first = packBeat(
       body,
       mid,
       [clothesLine(body.clothes, "topless") ?? ""],
       ACTION_BEAT_DURATION_SEC,
-      outdoor
+      outdoor,
     );
     const second = packBeat(
       mid,
       end,
       [clothesLine("topless", "bottomless") ?? ""],
       ACTION_BEAT_DURATION_SEC,
-      outdoor
+      outdoor,
     );
     return {
       ...first,
@@ -705,7 +772,7 @@ export const planPhysicalBeat = (
   const cameraMode: CameraMode = "hold";
   if (outdoor) {
     lines.push(
-      "The photo may be outdoors. Ignore that background. She is indoors at the desk webcam."
+      "The photo may be outdoors. Ignore that background. She is indoors at the desk webcam.",
     );
   }
 
@@ -733,16 +800,23 @@ export const planPhysicalBeat = (
   }
 
   const bottomAsk =
-    !/\b(show (me )?(your |ur |her )?ass|show (your |ur )?booty|from behind)\b/i.test(fanSaid) &&
+    !/\b(show (me )?(your |ur |her )?ass|show (your |ur )?booty|from behind)\b/i.test(
+      fanSaid,
+    ) &&
     /\b(pants off|shorts off|skirt off|bottoms off|take (your |the )?(pants|shorts|skirt|bottoms))\b/i.test(
-      fanSaid
+      fanSaid,
     );
   if (bottomAsk && body.clothes === "topless" && body.trousers === "on") {
     lines.push(clothesLine("clothed", "bottomless") ?? "");
     next.trousers = "off";
     next.underwear = "on";
   }
-  if (pantiesOff && body.trousers === "off" && body.underwear === "on" && next.underwear === "on") {
+  if (
+    pantiesOff &&
+    body.trousers === "off" &&
+    body.underwear === "on" &&
+    next.underwear === "on"
+  ) {
     lines.push(pantiesLine);
     next.underwear = "off";
     if (body.clothes === "topless") {
@@ -757,44 +831,46 @@ export const planPhysicalBeat = (
     next.pose = pose;
   }
 
-  const wantsToy = /\b(dildo|vibrator|vibe|wand|toy|fuck yourself)\b/i.test(fanSaid);
+  const wantsToy = /\b(dildo|vibrator|vibe|wand|toy|fuck yourself)\b/i.test(
+    fanSaid,
+  );
   const changedClothes = next.clothes !== body.clothes;
   if (!changedClothes && wantsToy && body.prop === "none") {
     next.prop = "fetching";
     next.hands = "free";
     lines.push(
-      "One hand reaches below the frame to pick something up. No toy is visible yet. Do not spawn an object in her hand."
+      "One hand reaches below the frame to pick something up. No toy is visible yet. Do not spawn an object in her hand.",
     );
   } else if (wantsToy && (body.prop === "fetching" || body.prop === "none")) {
     next.prop = /\bdildo\b/i.test(fanSaid) ? "dildo" : "vibrator";
     next.hands = "holding-toy";
     next.contact = "self";
     lines.push(
-      `The same hand comes back into frame holding one small toy. She brings it to her mouth and uses it there — mouth only, never lower. Only one toy. ${TOY_RULE}`
+      `The same hand comes back into frame holding one small toy. She brings it to her mouth and uses it there — mouth only, never lower. Only one toy. ${TOY_RULE}`,
     );
   } else if (wantsToy) {
     next.hands = "holding-toy";
     next.contact = "self";
     lines.push(
-      `She keeps the same toy already in her hand and uses it on her mouth — mouth only, never lower. ${TOY_RULE}`
+      `She keeps the same toy already in her hand and uses it on her mouth — mouth only, never lower. ${TOY_RULE}`,
     );
   }
 
   const wantsTouch =
     /\b(touch yourself|masturbat\w*|finger\w* yourself|play with (?:yourself|herself|your |her |my )?\s*(?:pussy|clit|cunt|it)?|rub your|spread|touch your|joi|jerk[\s-]?off instructions?)\b/i.test(
-      fanSaid
+      fanSaid,
     );
   if (wantsTouch && !wantsToy) {
     next.hands = "on-body";
     next.contact = "self";
     lines.push(
-      "One hand moves onto her own body and stays there. Fingers stay attached. The other arm supports her. No second person."
+      "One hand moves onto her own body and stays there. Fingers stay attached. The other arm supports her. No second person.",
     );
   }
 
   if (towardCamera(fanSaid)) {
     lines.push(
-      "She aims the act at the lens with her own mouth or hands. Do not add another person, another set of hands, or genitals that are not hers."
+      "She aims the act at the lens with her own mouth or hands. Do not add another person, another set of hands, or genitals that are not hers.",
     );
     if (next.hands === "free") {
       next.hands = "on-body";
@@ -810,14 +886,14 @@ export const planPhysicalBeat = (
   if (lines.length === 0) {
     const asked =
       /\b(show|take|put|bend|spread|turn|suck|touch|play|get|sit|lie|kneel|open|pull|strip|ass|legs|masturbat\w*|orgasm|climax|cum|drink\w*|coffee|tea|eat\w*|snack|smoke|vape|yawn|stretch|wave|laugh|smile|talk|dance)\b/i.test(
-        fanSaid
+        fanSaid,
       );
     lines.push(
       asked
         ? `She does exactly this, one clear action, and holds it: ${fanSaid}. Continue from the first frame. ` +
             "This request is not about clothing — do not add, remove, or shift any garment while she does it."
         : `Hold the pose already in the first frame (${body.pose}). Small weight shift, real breathing, eyes on the lens. ` +
-            "Do not remove or add any clothing. Do not start any new act."
+            "Do not remove or add any clothing. Do not start any new act.",
     );
   }
 
@@ -826,7 +902,7 @@ export const planPhysicalBeat = (
       next.trousers === body.trousers &&
       next.underwear === body.underwear
       ? "OUTFIT FREEZE: copy the first frame's clothes. Do not add or remove a garment."
-      : "ONE GARMENT ONLY. Slow strip tease of that one piece. Fabric has weight."
+      : "ONE GARMENT ONLY. Slow strip tease of that one piece. Fabric has weight.",
   );
 
   const beat: PlannedBeat = {
@@ -836,14 +912,29 @@ export const planPhysicalBeat = (
     durationSec: ACTION_BEAT_DURATION_SEC,
     followUp: null,
   };
-  if (pantiesOff && body.trousers === "on" && next.trousers === "off" && next.underwear === "on") {
+  if (
+    pantiesOff &&
+    body.trousers === "on" &&
+    next.trousers === "off" &&
+    next.underwear === "on"
+  ) {
     const after: BodyState = {
       ...next,
       underwear: "off",
       clothes: next.clothes === "topless" ? "nude" : next.clothes,
     };
-    const second = packBeat(next, after, [pantiesLine], ACTION_BEAT_DURATION_SEC, outdoor);
-    beat.followUp = { physical: second.physical, nextBody: after, durationSec: second.durationSec };
+    const second = packBeat(
+      next,
+      after,
+      [pantiesLine],
+      ACTION_BEAT_DURATION_SEC,
+      outdoor,
+    );
+    beat.followUp = {
+      physical: second.physical,
+      nextBody: after,
+      durationSec: second.durationSec,
+    };
   }
   return beat;
 };
@@ -868,7 +959,7 @@ export const planTurn = (
   fanSaid: string,
   body: BodyState,
   outdoor: boolean,
-  sceneHasBed = true
+  sceneHasBed = true,
 ) => {
   // Fans phrase a sequence as "X then Y", "X, then Y", "X and then Y", or "X, Y" — split on all of them
   // so a multi-step request queued as one message chains just like separate messages do.
@@ -881,7 +972,9 @@ export const planTurn = (
   let state = body;
   const clips: PlannedBeat[] = [];
   for (const clause of clauses) {
-    const flat = flattenBeat(planPhysicalBeat(clause, state, outdoor, sceneHasBed));
+    const flat = flattenBeat(
+      planPhysicalBeat(clause, state, outdoor, sceneHasBed),
+    );
     clips.push(...flat);
     state = flat[flat.length - 1]?.nextBody ?? state;
   }
@@ -905,7 +998,11 @@ const typingHands = (body: BodyState) =>
 const MINOR_GESTURE =
   /blows one kiss|sticks her tongue out|raises one hand, waves|turns once in place|sways her hips for the webcam|gives her chest one natural bounce|sees the tip, looks into the webcam/i;
 
-export const chatClipDirection = (leadSec: number, physical: string, body: BodyState) => {
+export const chatClipDirection = (
+  leadSec: number,
+  physical: string,
+  body: BodyState,
+) => {
   if (!MINOR_GESTURE.test(physical)) {
     return (
       `From the first frame, do this and hold the result. Do not type first. ` +
@@ -929,7 +1026,7 @@ export const voiceClipDirection = (physical: string) => {
   }
   if (
     /back fully to the webcam|sets the toy down|presses it|STRIP TEASE|no toy is visible/i.test(
-      physical
+      physical,
     )
   ) {
     return `From the first second she does this: ${physical} She is not typing. No phone. ${CAMERA_RULE}`;
@@ -955,20 +1052,36 @@ export const idleDirection = (body: BodyState, callElapsedSec = 0) => {
       : body.contact === "self" || body.hands === "on-body"
         ? "Her hand has already eased off her body and rests naturally at her side or on her leg — she has paused. "
         : "";
-  const beat = FILLER_BEATS[Math.floor(Math.max(0, callElapsedSec) / 8) % FILLER_BEATS.length];
+  const beat =
+    FILLER_BEATS[
+      Math.floor(Math.max(0, callElapsedSec) / 8) % FILLER_BEATS.length
+    ];
   return (
     `WAITING, between requests — whatever she was just asked to do is already finished. ` +
     `Continue the exact place and clothes in the first frame. ${wardrobeLine(body)} ${pause}` +
     `Do not introduce any new object. Do not add or remove clothing. Do not start, continue, or finish any sexual act. ` +
-    `${beat} Tiny idle motion only, eyes on the lens or the chat. This is a pause to chat and tease, not to perform. Silent. Mouth closed.`
+    `${beat} Tiny idle motion only, eyes on the lens or the chat. This is a pause to chat and tease, not to perform. ` +
+    `Silent. Mouth closed the entire clip. No speech, no lip movement, no talking.`
   );
 };
 
 // Only used when the LLM call itself fails — several worded variants so a repeated
 // fallback within one call doesn't read as the same canned line twice.
-const CHAT_FALLBACK_TOY = ["one sec, getting it", "hold on, grabbing it for you", "mm, one sec"];
-const CHAT_FALLBACK_REVEAL = ["okay watch", "mmm watch this", "here you go, watch"];
-const CHAT_FALLBACK_TIP = ["thank you baby", "mmm thank you", "you're so sweet, thank you"];
+const CHAT_FALLBACK_TOY = [
+  "one sec, getting it",
+  "hold on, grabbing it for you",
+  "mm, one sec",
+];
+const CHAT_FALLBACK_REVEAL = [
+  "okay watch",
+  "mmm watch this",
+  "here you go, watch",
+];
+const CHAT_FALLBACK_TIP = [
+  "thank you baby",
+  "mmm thank you",
+  "you're so sweet, thank you",
+];
 const CHAT_FALLBACK_DEFAULT = [
   "mmm i heard you, watch",
   "ohh someone's needy today",
@@ -989,7 +1102,11 @@ const pickVariant = (pool: string[], seed: number): string => {
   return pool[index] ?? pool[0] ?? "";
 };
 
-export const fallbackLine = (channel: InputChannel, physical: string, seed = 0) => {
+export const fallbackLine = (
+  channel: InputChannel,
+  physical: string,
+  seed = 0,
+) => {
   if (channel === "chat") {
     if (/toy|reach/i.test(physical)) {
       return pickVariant(CHAT_FALLBACK_TOY, seed);

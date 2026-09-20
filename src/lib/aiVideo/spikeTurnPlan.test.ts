@@ -245,6 +245,27 @@ describe("planPhysicalBeat", () => {
     );
   });
 
+  it("puts doggystyle on hands and knees, not the standing bend-over that a plain ass-view gets", () => {
+    const beat = planPhysicalBeat(
+      "doggystyle",
+      { ...clothed, pose: "sitting" },
+      false,
+    );
+    expect(beat.nextBody.pose).toBe("kneeling");
+    expect(beat.physical).toMatch(/hands and knees/i);
+    expect(beat.physical).not.toMatch(/she stands, turns her back/i);
+  });
+
+  it("holds the doggystyle position on a repeat request instead of standing her back up", () => {
+    const beat = planPhysicalBeat(
+      "do doggystyle again",
+      { ...clothed, pose: "kneeling" },
+      false,
+    );
+    expect(beat.nextBody.pose).toBe("kneeling");
+    expect(beat.physical).toMatch(/stays on her hands and knees/i);
+  });
+
   it("keeps a toy from fusing into her body once it's in her hand", () => {
     const beat = planPhysicalBeat(
       "use the dildo",

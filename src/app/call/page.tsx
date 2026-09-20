@@ -878,14 +878,15 @@ export default function AiVideoCallPage() {
         if (!step) {
           continue;
         }
-        const nextPromise = requestClip(null, {
-          inputChannel: activeChannel,
-          scriptedPhysical: step.physical,
-          scriptedDuration: step.durationSec,
-          scriptedLiveState: step.liveState,
-        });
-        await waitForActiveEnded();
-        const next = await nextPromise;
+        // Cover with filler if generation runs past the current clip's end, same as every other request — otherwise the screen freezes on the last frame.
+        const next = await playUntilReady(
+          requestClip(null, {
+            inputChannel: activeChannel,
+            scriptedPhysical: step.physical,
+            scriptedDuration: step.durationSec,
+            scriptedLiveState: step.liveState,
+          }),
+        );
         if (!next?.videoUrl || !callActiveRef.current) {
           return;
         }

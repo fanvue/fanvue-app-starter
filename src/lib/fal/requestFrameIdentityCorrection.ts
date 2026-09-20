@@ -13,7 +13,9 @@ const NANO_BANANA_EDIT_MODEL_PATH = "fal-ai/nano-banana-2/edit";
 const IDENTITY_CORRECTION_PROMPT =
   "Restore the exact face, hair, skin tone, and body of the FIRST reference image onto the SECOND image. " +
   "Keep the second image's pose, clothing, framing, background, and camera angle completely unchanged — " +
-  "only correct her identity and likeness back to the first reference image. Photoreal, single subject, no extra limbs.";
+  "only correct her identity and likeness back to the first reference image. Photoreal, single subject, no extra limbs. " +
+  "Do not use the first image's clothing or nudity state — if the second image shows her clothed, keep her exactly that clothed; " +
+  "if it shows her nude or partially undressed, keep her exactly that nude or undressed. Never add or remove a garment.";
 
 // Spike-only: counters gradual likeness drift from chaining H3 Max off its own last frame by
 // periodically re-grounding the current frame against the original reference photo.
